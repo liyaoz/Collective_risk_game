@@ -5,7 +5,7 @@ import game
 
 class Agent():
 
-    def __init__(self):
+    def __init__(self, R, M, initialwealth):
 
         'add variables to construct agent instance and define instance variables'
 

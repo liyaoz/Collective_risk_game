@@ -19,6 +19,18 @@ class game():
         self.threshold = 0      # Threshold
 
 
+    def createPalyers(self):
+        players = []
+        IW = 100     # Initial Wealth
+#        for i in range(self.N):
+#            players.append(agent.Agent(self.R, self.N, IW))
+#
+#(strategy, wealth, fitness)
+
+
+    def updatePopulation(self):
+        pass
+
     def lossfrac(self, alpha):
 
         """the percentage of wealth that players are going to lose if collective-risk happens"""
@@ -36,3 +48,19 @@ class game():
         elif RF == 2:
             return 1
         return 0
+
+
+
+    def computePayoff(self):
+        pass
+
+
+    def selectPlayers(self):
+        """
+            Randomly select M players from population of size N.
+        """
+        return np.random.choice(self.N, self.M)
+
+
+    def play(self):
+        pass
