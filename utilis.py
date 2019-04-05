@@ -1,4 +1,4 @@
 file = open("workfile","r")
-print(file.read())
+print(file.readline())
 
 
