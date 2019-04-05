@@ -14,7 +14,7 @@ class Agent():
 
 
 
-    def chooseAction(selfs):
+    def chooseAction(self):
 
         'implement your strategy here'
 
