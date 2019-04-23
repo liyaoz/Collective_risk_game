@@ -65,28 +65,39 @@ class Graph:
         select = []
         selectedNodes = {i: 0 for i in range(self.N)}
 
-        while edges:       # Loop when edges is not empty
-            i, j = edges[np.random.randint(0, len(edges))]
-            # print("selected nodes:", i, j)
-            select.append((i, j))
-            nodes.remove(i)
-            nodes.remove(j)
-            selectedNodes[i] += 1
-            selectedNodes[j] += 1
-            # print("Remaining nodes:", nodes)
-            edges = [(a, b) for (a, b) in edges if (a != i) and (a != j)
-                     and (b != i) and (b != j)]
-            # print("after removal", edges)
+        if self.K == self.N - 1:     #Well-mixed graph
+            permutation = np.random.permutation(self.N)
+            selectedNodes = {i: 1 for i in range(self.N)}
+            if self.N % 2 == 1:
+                extraNode = np.random.randint(0, self.N)
+                while extraNode == permutation[self.N - 1]:
+                    extraNode = np.random.randint(0, self.N)
+                np.append(permutation, extraNode)
+                selectedNodes[extraNode] += 1
+            select = permutation.reshape((int(len(permutation)/2), 2))
+        else:
+            while edges:       # Loop when edges is not empty
+                i, j = edges[np.random.randint(0, len(edges))]
+                # print("selected nodes:", i, j)
+                select.append((i, j))
+                nodes.remove(i)
+                nodes.remove(j)
+                selectedNodes[i] += 1
+                selectedNodes[j] += 1
+                # print("Remaining nodes:", nodes)
+                edges = [(a, b) for (a, b) in edges if (a != i) and (a != j)
+                         and (b != i) and (b != j)]
+                # print("after removal", edges)
 
-        while nodes:
-            v = nodes.pop(np.random.randint(0, len(nodes)))
-            v_edges = [(i, j) for (i, j) in self.edges if i == v or j == v]
-            i, j = v_edges[np.random.randint(len(v_edges))]
-            select.append((i, j))
-            selectedNodes[i] += 1
-            selectedNodes[j] += 1
+            while nodes:
+                v = nodes.pop(np.random.randint(0, len(nodes)))
+                v_edges = [(i, j) for (i, j) in self.edges if i == v or j == v]
+                i, j = v_edges[np.random.randint(len(v_edges))]
+                select.append((i, j))
+                selectedNodes[i] += 1
+                selectedNodes[j] += 1
 
-        # print("Number of each nodes selected:", selectedNodes)
+            # print("Number of each nodes selected:", selectedNodes)
         self.selectedNodes = selectedNodes
         return select
 

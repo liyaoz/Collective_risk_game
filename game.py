@@ -172,20 +172,19 @@ def rep(repeat, N=100, R=1, K=99, P=0, Actions=[0, 0.2, 0.4, 0.6, 0.8], I=1000, 
     return data
 
 
-
 def averageOfLast(data, Actions, r=0, lastIterations=100 ):
     sum = 0
-    action_counter = {}
+    action_counter = {action:0 for action in Actions}
 
     for i in range(-1, -lastIterations-1, -1):
         sum += np.sum(data[i, r] * Actions)
-        for a in Actions:
-            action_counter[a] += data[i, r, a]/lastIterations
+        for a in range(len(Actions)):
+            action_counter[Actions[a]] += data[i, r, a]/lastIterations
     return (sum/100, action_counter)
 
 
 
-def graph_kp3d(Actions, Klist=[2], Plist=[0.2, 0.5, 0.8], repeat=1):
+def graph_kp3d(Actions, Klist=[2, 4], Plist=[0.2, 0.5, 0.8], repeat=1):
     K = Klist
     P = Plist
 
@@ -194,7 +193,8 @@ def graph_kp3d(Actions, Klist=[2], Plist=[0.2, 0.5, 0.8], repeat=1):
     for k in range(len(K)):
         for p in range(len(P)):
             data = rep(repeat, K=K[k], P=P[p])    # Specify other params by adding here or change default of rep
-            meanA[k][p] = averageOfLast(data, Actions, lastIterations=100)  # Doing the first round only -- for now
+            meanA[k][p] = averageOfLast(data, Actions, lastIterations=100)[0]  # Doing the first round only -- for now
+            print("k, p, mean",k,p,meanA[k][p])
 
     P, K = np.meshgrid(P, K)
 
@@ -206,6 +206,35 @@ def graph_kp3d(Actions, Klist=[2], Plist=[0.2, 0.5, 0.8], repeat=1):
 
     fig.colorbar(surf, shrink=0.5, aspect=5)
     plt.show()
+
+
+def stackBar_alpha(r, Actions, alphaList, repeat=1):    # Plotting the data for round r
+
+    A = len(Actions)
+    p = []
+    count = np.zeros((A, len(alphaList)))     # of each action in each iter
+    ind = np.arange(len(alphaList))
+    width = 0.3
+
+    for al in range(len(alphaList)):
+        data = rep(repeat, Actions=Actions, alpha=alphaList[al])
+        action_counter = averageOfLast(data, Actions, r, 100)[1]
+        for a in range(A):
+            count[a, al] = action_counter[Actions[a]]
+    base = 0
+
+    for a in range(A):
+        p.append(plt.bar(ind, count[a], width, bottom=base, color=str(0.9 - 0.9 * Actions[a])))
+        base += count[a]
+
+    plt.ylabel('Number of Actions')
+    plt.xlabel('Alpha, the loss fraction')
+    plt.title('Average Number of Actions in Round ' + str(r+1))
+    plt.xticks(ind, alphaList)
+    # plt.yticks(np.arange(0, 81, 10))
+    plt.legend(tuple([p[x][0] for x in range(A)][::-1]), tuple(Actions[::-1]), loc='lower left')
+    plt.show()
+
 
 
 def main():
@@ -226,19 +255,22 @@ def main():
     Graph1: Number of Actions of Round r (start by 0) by Iteration
     """
     # Repeat game and get the averaged data
-    RepeatTimes = 30
-    data = rep(RepeatTimes, N, R, K, P, Actions, I, RF, alpha)
-
-    for r in range(R):
-        stackPlot(data, r, Actions, I, "Fully-Mixed Graph")
+    # RepeatTimes = 30
+    # data = rep(RepeatTimes, N, R, K, P, Actions, I, RF, alpha)
+    #
+    # for r in range(R):
+    #     stackPlot(data, r, Actions, I, "Fully-Mixed Graph")
 
     """
     Graph2: Average contribution by K, P
     """
 
-    graph_kp3d(Actions)
+    # graph_kp3d(Actions)
 
-
+    """
+    Graph3: Actions by different alpha value
+    """
+    stackBar_alpha(0, Actions, alphaList=[0, 0.2, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
 
 if __name__ == '__main__':
     main()
