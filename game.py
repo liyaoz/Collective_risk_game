@@ -6,7 +6,8 @@ import utilis, agent, graph
 
 
 class game:
-    def __init__(self, N=100, R=1, K=99, P=0, Actions=[0, 0.2, 0.4, 0.6, 0.8], I=1000, RF=0, alpha=1):
+    def __init__(self, N=100, R=1, K=99, P=0, Actions=[0, 0.2, 0.4, 0.6, 0.8], I=1000, RF=0, alpha=1, epsilon=0.1,
+                 multiArm='greedy', threshold=0.8):
         # datamap = utilis.read()
         # self.N = datamap['N']  # N-Player Game
         # self.M = datamap['M']  # Randomly choose M players to play the game (normally 2)
@@ -14,13 +15,12 @@ class game:
         # self.alpha = datamap['alpha']  # Loss fraction
         # self.R = datamap['R']   # Rounds of a game
 
-
         self.N = N
         self.M = 2
         self.RF = RF
         self.alpha = alpha
         self.R = R
-        self.threshold = 0.5      # Threshold
+        self.threshold = threshold  # Threshold
         # self.actions = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
         self.actions = Actions
         self.iterations = I
@@ -40,22 +40,19 @@ class game:
         # assert (self.rewire_k < self.N)
         self.graph = graph.Graph(self.N, self.rewire_k, self.rewire_p)
 
-
         "Create players"
         self.players = []
-        IW = 100     # Initial Wealth - can be input, can be variable to distinguish population
-        self.totalWealth = self.M * IW    # subject to change
+        IW = 100  # Initial Wealth - can be input, can be variable to distinguish population
+        self.totalWealth = self.M * IW  # subject to change
         for i in range(self.N):
-            self.players.append(agent.Agent(self.R, IW, self.actions))
+            self.players.append(agent.Agent(self.R, IW, self.actions, epsilon=epsilon, multiArm=multiArm))
 
-
-
-    def riskfunc(self,contribution,totalwealth):
+    def riskfunc(self, contribution, totalwealth):
         """
             the probability of collective-risk happening, given contribution
         """
 
-        proportion = contribution/totalwealth
+        proportion = contribution / totalwealth
 
         if self.RF == 0:
             # probably parse more parameters here
@@ -63,21 +60,20 @@ class game:
 
 
         elif self.RF == 1:
-            if proportion >= 0.5:
+            if proportion >= self.threshold:
                 return 0
             else:
                 return 1
 
 
         elif self.RF == 2:
-            threshold = 0.5
-            if proportion < threshold:
-                return 1 - proportion / threshold
+
+            if proportion < self.threshold:
+                return 1 - proportion / self.threshold
             else:
                 return 0
 
         return "error"
-
 
     def play(self):
 
@@ -89,13 +85,13 @@ class game:
         for iter in range(self.iterations):
 
             actionTable = np.zeros((self.N, self.R))
-            strategyTable = np.zeros((self.R, self.N))        # DIFFERENT AXIS R-N
+            strategyTable = np.zeros((self.R, self.N))  # DIFFERENT AXIS R-N
             lossTable = np.zeros((self.N, self.R))
 
-            for playerIndex in range(self.N):                 # For each player
+            for playerIndex in range(self.N):  # For each player
                 player = self.players[playerIndex]
-                player.resetWealth()                          # reset initial wealth
-                for r in range(self.R):                              # For each round
+                player.resetWealth()  # reset initial wealth
+                for r in range(self.R):  # For each round
                     action = player.chooseAction(r)
                     actionTable[playerIndex][r] = action
                     strategyTable[r][playerIndex] = player.getStrategy()[r]
@@ -104,13 +100,13 @@ class game:
             for r in range(self.R):
                 for [i, j] in playersNo:
                     pool = 0
-                    pool += self.players[i].getWealth() * actionTable[i][r] +\
+                    pool += self.players[i].getWealth() * actionTable[i][r] + \
                             self.players[j].getWealth() * actionTable[j][r]
                     risk = self.riskfunc(pool, self.totalWealth)
 
                     for p in [i, j]:
                         if np.random.uniform(0, 1) < risk:
-                            lossTable[p, r] += self.alpha/self.graph.getNodesNumber()[p]
+                            lossTable[p, r] += self.alpha / self.graph.getNodesNumber()[p]
                 for i in range(self.N):
                     self.players[i].updateReward(r, actionTable[i][r], lossTable[i][r])
 
@@ -135,9 +131,7 @@ class game:
         return results
 
 
-
-def stackPlot(data, r, Actions, Iterations, titleComment = ""):
-
+def stackPlot(data, r, Actions, Iterations, titleComment=""):
     A = len(Actions)
     x = range(Iterations)
     y = np.zeros((Iterations, A))
@@ -147,44 +141,48 @@ def stackPlot(data, r, Actions, Iterations, titleComment = ""):
 
     fig, ax = plt.subplots()
     # grays = np.arange(0, 1, (max(Actions) - min(Actions))/A)
-    ax.stackplot(x, y, labels=Actions, colors=[str(1 - x) for x in Actions])
+    ax.stackplot(x, y, labels=Actions, colors=[str(0.9 - 0.9 * x) for x in Actions])
     ax.legend(loc='lower right')
     plt.ylabel('Number of Actions')
     plt.xlabel('Time(iterations)')
 
-    title = 'Average Number of Actions in Round ' + str(r+1) + ')'
-    if not titleComment:
+    title = 'Average Number of Actions in Round ' + str(r + 1)
+    if titleComment:
         title += "\n" + titleComment
 
     plt.title(title)
+
+    plt.savefig(titleComment + " in round " + str(r+1) + ".jpg")
+
     plt.show()
 
 
-def rep(repeat, N=100, R=1, K=99, P=0, Actions=[0, 0.2, 0.4, 0.6, 0.8], I=1000, RF=0, alpha=1):
+# def rep(repeat, N=100, R=1, K=99, P=0, Actions=[0, 0.2, 0.4, 0.6, 0.8], I=1000, RF=0, alpha=1, epsilon=0.1, multiArm='greedy'):
+
+def rep(repeat=30, R=1, Actions=[0, 0.2, 0.4, 0.6, 0.8], I=1000, **kwargs):
     data = np.zeros((I, R, len(Actions)))
     Actions.sort()
     for re in range(repeat):
         print("REP", re)
-        g = game(N, R, K, P, Actions, I, RF, alpha)
+        g = game(R=R, Actions=Actions, I=I, **kwargs)
         result = g.play()
         data += result
     data /= repeat
     return data
 
 
-def averageOfLast(data, Actions, r=0, lastIterations=100 ):
+def averageOfLast(data, Actions, r=0, lastIterations=100):
     sum = 0
-    action_counter = {action:0 for action in Actions}
+    action_counter = {action: 0 for action in Actions}
 
-    for i in range(-1, -lastIterations-1, -1):
+    for i in range(-1, -lastIterations - 1, -1):
         sum += np.sum(data[i, r] * Actions)
         for a in range(len(Actions)):
-            action_counter[Actions[a]] += data[i, r, a]/lastIterations
-    return (sum/100, action_counter)
+            action_counter[Actions[a]] += data[i, r, a] / lastIterations
+    return (sum / 100, action_counter)
 
 
-
-def graph_kp3d(Actions, Klist=[2, 4], Plist=[0.2, 0.5, 0.8], repeat=1):
+def graph_kp3d(Actions, Klist=[99], Plist=[0, 0.3, 0.6, 0.9], repeat=30):
     K = Klist
     P = Plist
 
@@ -192,9 +190,9 @@ def graph_kp3d(Actions, Klist=[2, 4], Plist=[0.2, 0.5, 0.8], repeat=1):
 
     for k in range(len(K)):
         for p in range(len(P)):
-            data = rep(repeat, K=K[k], P=P[p])    # Specify other params by adding here or change default of rep
+            data = rep(repeat, K=K[k], P=P[p], Actions=Actions)  # Specify other params by adding here
             meanA[k][p] = averageOfLast(data, Actions, lastIterations=100)[0]  # Doing the first round only -- for now
-            print("k, p, mean",k,p,meanA[k][p])
+            print("k, p, mean", k, p, meanA[k][p])
 
     P, K = np.meshgrid(P, K)
 
@@ -208,16 +206,40 @@ def graph_kp3d(Actions, Klist=[2, 4], Plist=[0.2, 0.5, 0.8], repeat=1):
     plt.show()
 
 
-def stackBar_alpha(r, Actions, alphaList, repeat=1):    # Plotting the data for round r
+def stackBar(r, Actions, repeat=30, multiArm='greedy', **kwargs):  # Plotting the data for round r
+
+    # if len(kwargs) != 1:
+    #     print("ERROR, Stack Bar Graph Expects 1 List, gets:", len(kwargs))
+    # key, alist = list(kwargs.items())[0]
+
+    key = -1
+    alist = []
+    for k, v in kwargs.items():
+        if isinstance(v, list):
+            if key == -1:
+                key = k
+                alist = v
+            else:
+                print("ERROR, Stack Bar Graph Expects Only 1 List to Compare")
+                exit(4)
+    del kwargs[k]
+
+    print("Comparing:", key)
+    print("On:", alist)
 
     A = len(Actions)
     p = []
-    count = np.zeros((A, len(alphaList)))     # of each action in each iter
-    ind = np.arange(len(alphaList))
+    count = np.zeros((A, len(alist)))  # of each action in each iter
+    ind = np.arange(len(alist))
     width = 0.3
 
-    for al in range(len(alphaList)):
-        data = rep(repeat, Actions=Actions, alpha=alphaList[al])
+    for al in range(len(alist)):
+        newKwargs = {**{key: alist[al]}, **kwargs}
+        if key == 'N':
+            newKwargs['K'] = alist[al] - 1
+        elif 'N' not in newKwargs.keys():
+            newKwargs['N'] = 100  # default value
+        data = rep(repeat, Actions=Actions, multiArm=multiArm, **newKwargs) / newKwargs['N'] * 100
         action_counter = averageOfLast(data, Actions, r, 100)[1]
         for a in range(A):
             count[a, al] = action_counter[Actions[a]]
@@ -227,18 +249,19 @@ def stackBar_alpha(r, Actions, alphaList, repeat=1):    # Plotting the data for 
         p.append(plt.bar(ind, count[a], width, bottom=base, color=str(0.9 - 0.9 * Actions[a])))
         base += count[a]
 
-    plt.ylabel('Number of Actions')
-    plt.xlabel('Alpha, the loss fraction')
-    plt.title('Average Number of Actions in Round ' + str(r+1))
-    plt.xticks(ind, alphaList)
-    # plt.yticks(np.arange(0, 81, 10))
-    plt.legend(tuple([p[x][0] for x in range(A)][::-1]), tuple(Actions[::-1]), loc='lower left')
+    plt.ylabel('Percentage of Actions')
+    if key == 'epsilon':
+        plt.xlabel(key + ' (' + multiArm + ')')
+    else:
+        plt.xlabel(key)
+    plt.title('Average Number of Actions in Round ' + str(r + 1))
+    plt.xticks(ind, alist)
+    plt.yticks(np.arange(0, 101, 10))
+    plt.legend(tuple([p[x][0] for x in range(A)][::-1]), tuple(Actions[::-1]), loc='best')
     plt.show()
 
 
-
 def main():
-
     # Read-in or Define Parameters
 
     N = 100
@@ -247,19 +270,26 @@ def main():
     P = 0
     I = 1000
     RF = 0
-    alpha =1
+    alpha = 1
     Actions = [0, 0.2, 0.4, 0.6, 0.8]
-
 
     """
     Graph1: Number of Actions of Round r (start by 0) by Iteration
     """
-    # Repeat game and get the averaged data
+
     # RepeatTimes = 30
-    # data = rep(RepeatTimes, N, R, K, P, Actions, I, RF, alpha)
-    #
-    # for r in range(R):
-    #     stackPlot(data, r, Actions, I, "Fully-Mixed Graph")
+    # for N in [5, 10, 20, 50, 100]:
+    #     K = N - 1
+    #     for R in [1, 2, 4]:
+    #         for alpha in [0.2, 0.4, 0.6, 0.8, 1]:
+    #             data = rep(RepeatTimes, R, Actions, I, N=N, K=K, alpha=alpha)
+    #             for r in range(R):
+    #                 stackPlot(data, r, Actions, I, titleComment="N="+ str(N) + ", R=" + str(R) + ", alpha=" +str(alpha) + ", Well-Mixed graph")
+
+    for k in [2, 4, 10, 40, 90, 99]:
+        data = rep(repeat=30, N=100, K=k, Actions=Actions, R=1, I=I, P=P)
+        stackPlot(data, r=0, Iterations=I, Actions=Actions, titleComment=("K=" + str(k) + ", P=" + str(P)))
+
 
     """
     Graph2: Average contribution by K, P
@@ -270,7 +300,16 @@ def main():
     """
     Graph3: Actions by different alpha value
     """
-    stackBar_alpha(0, Actions, alphaList=[0, 0.2, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
+    # stackBar(0, Actions, repeat=1, alpha=[0, 0.2, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
+    # stackBar(0, Actions, repeat=1, N=[5, 10, 20, 50, 100])
+    # stackBar(0, Actions, repeat=1, RF=2, threshold=[0.2, 0.4, 0.6, 0.8, 1])
+
+    """
+    Graph4: Actions by different epsilon method + value
+    """
+    # stackBar(0, Actions, repeat=1, multiArm='greedy', epsilon=[0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
+    # stackBar(0, Actions, repeat=30, multiArm='decrease', epsilon=[0.8, 0.9, 0.95, 0.98, 0.99, 0.999, 0.9999])
+
 
 if __name__ == '__main__':
     main()

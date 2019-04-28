@@ -72,8 +72,9 @@ class Graph:
                 extraNode = np.random.randint(0, self.N)
                 while extraNode == permutation[self.N - 1]:
                     extraNode = np.random.randint(0, self.N)
-                np.append(permutation, extraNode)
+                permutation = np.append(permutation, extraNode)
                 selectedNodes[extraNode] += 1
+
             select = permutation.reshape((int(len(permutation)/2), 2))
         else:
             while edges:       # Loop when edges is not empty

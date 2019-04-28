@@ -16,13 +16,13 @@ import numpy as np
 class Agent:
 
     def __init__(self, rounds, initialWealth, availableActions, alpha=0.1,
-                 gamma=0.9, epsilon=0.1):
+                 gamma=0.9, epsilon=0.1, multiArm='greedy'):
 
         self.R = rounds
         self.initialWealth = initialWealth
         self.wealth = initialWealth
         self.availableActions = availableActions
-        # self.iteration = 0
+        self.iteration = 0
 
         """initialise Q table to small random numbers"""
         self.qTable = np.random.rand(self.R, len(self.availableActions)) * 0.01
@@ -31,6 +31,7 @@ class Agent:
         self.learnRate = alpha
         self.discount  = gamma
         self.epsilon   = epsilon
+        self.multiArm  = multiArm
 
     def updateReward(self, round, action, loss):
         """
@@ -57,8 +58,8 @@ class Agent:
                 reward + self.discount * maxNextQ - self.qTable[round][index])
         # print("QTABLE:", self.qTable)
 
-        # if round == self.R - 1:
-        #     self.iteration += 1
+        if round == self.R - 1:
+            self.iteration += 1
             # print("Player iteration +1 =", self.iteration)
 
 
@@ -66,14 +67,18 @@ class Agent:
 
         """Method: Q-learning"""
 
-        """Epsilon Decrease"""
+        randomAct = False
+        if self.multiArm == 'decrease':
+            """Epsilon Decrease"""
+            if np.random.uniform(0, 1) <= 1 * self.epsilon ** self.iteration:
+               randomAct = True
 
-        # if np.random.uniform(0, 1) <= 1 * self.epsilon ** self.iteration:
+        elif self.multiArm == 'greedy':
+            """EPSILON GREEDY"""
+            if np.random.uniform(0, 1) <= self.epsilon:
+                randomAct = True
 
-        """EPSILON GREEDY"""
-
-        if np.random.uniform(0, 1) <= self.epsilon:
-
+        if randomAct:
             return np.random.choice(self.availableActions)
         else:
             index = np.argmax(self.qTable[roundNumber])
