@@ -142,7 +142,7 @@ def stackPlot(data, r, Actions, Iterations, titleComment=""):
     fig, ax = plt.subplots()
     # grays = np.arange(0, 1, (max(Actions) - min(Actions))/A)
     ax.stackplot(x, y, labels=Actions, colors=[str(0.9 - 0.9 * x) for x in Actions])
-    ax.legend(loc='lower right')
+    ax.legend(loc='best')
     plt.ylabel('Number of Actions')
     plt.xlabel('Time(iterations)')
 
@@ -152,7 +152,7 @@ def stackPlot(data, r, Actions, Iterations, titleComment=""):
 
     plt.title(title)
 
-    plt.savefig(titleComment + " in round " + str(r+1) + ".jpg")
+    plt.savefig(titleComment + " in round " + str(r+1) + ".png")
 
     plt.show()
 
@@ -171,7 +171,7 @@ def rep(repeat=30, R=1, Actions=[0, 0.2, 0.4, 0.6, 0.8], I=1000, **kwargs):
     return data
 
 
-def averageOfLast(data, Actions, r=0, lastIterations=100):
+def averageOfLast(data, Actions, N=100, r=0, lastIterations=100):
     sum = 0
     action_counter = {action: 0 for action in Actions}
 
@@ -179,10 +179,10 @@ def averageOfLast(data, Actions, r=0, lastIterations=100):
         sum += np.sum(data[i, r] * Actions)
         for a in range(len(Actions)):
             action_counter[Actions[a]] += data[i, r, a] / lastIterations
-    return (sum / 100, action_counter)
+    return (sum / (lastIterations * N), action_counter)
 
 
-def graph_kp3d(Actions, Klist=[99], Plist=[0, 0.3, 0.6, 0.9], repeat=30):
+def graph_kp3d(Actions, Klist=[2, 4, 8, 10], Plist=[0, 0.3, 0.6, 0.9], repeat=30, N=100):
     K = Klist
     P = Plist
 
@@ -191,7 +191,7 @@ def graph_kp3d(Actions, Klist=[99], Plist=[0, 0.3, 0.6, 0.9], repeat=30):
     for k in range(len(K)):
         for p in range(len(P)):
             data = rep(repeat, K=K[k], P=P[p], Actions=Actions)  # Specify other params by adding here
-            meanA[k][p] = averageOfLast(data, Actions, lastIterations=100)[0]  # Doing the first round only -- for now
+            meanA[k][p] = averageOfLast(data, Actions, lastIterations=100, N=N)[0]  # Doing the first round only -- for now
             print("k, p, mean", k, p, meanA[k][p])
 
     P, K = np.meshgrid(P, K)
@@ -204,6 +204,51 @@ def graph_kp3d(Actions, Klist=[99], Plist=[0, 0.3, 0.6, 0.9], repeat=30):
 
     fig.colorbar(surf, shrink=0.5, aspect=5)
     plt.show()
+
+def graph3d_alpha_threshold(Actions, repeat=30, AlphaList=np.arange(0, 1.01, 0.05), ThreshList=np.arange(0.1, 1.1, 0.1), N=100, **kwargs):
+
+    mean = np.zeros((len(ThreshList), len(AlphaList)))
+    ratio_by_threshold = np.zeros((len(ThreshList), len(AlphaList)))
+
+    for t in range(len(ThreshList)):
+        for a in range(len(AlphaList)):
+            print("Calculating... t, alpha = ", t, a)
+            data = rep(repeat=repeat, Actions=Actions, alpha=AlphaList[a], threshold=ThreshList[t], **kwargs)
+            mean[t][a] = averageOfLast(data, Actions, lastIterations=100, N=N)[0]
+        ratio_by_threshold[t] = mean[t] / ThreshList[t]
+
+
+    A, T = np.meshgrid(AlphaList, ThreshList)
+
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+
+    surf = ax.plot_surface(A, T, mean, cmap=cm.Greys,
+                           linewidth=0, antialiased=False)
+    ax.set_xlabel('Alpha')
+    # ax.invert_xaxis()
+    ax.set_ylabel('Threshold')
+    ax.set_zlabel('Average contribution')
+    fig.colorbar(surf, shrink=0.5, aspect=5)
+    # plt.show()
+
+
+    fig2 = plt.figure()
+    ax2 = fig2.gca(projection='3d')
+    surf2 = ax2.plot_surface(A, T, ratio_by_threshold, cmap=cm.Greys,
+                           linewidth=0, antialiased=False)
+    ax2.set_xlabel('Alpha')
+    # ax.invert_xaxis()
+    ax2.set_ylabel('Threshold')
+    # ax.invert_yaxis()
+    ax2.set_zlabel('Average contribution by threshold')
+    fig2.colorbar(surf2, shrink=0.5, aspect=5)
+    plt.show()
+
+
+# def hist2d_alpha_threshold(Actions, repeat=30, AlphaList=np.arange(0, 1.1, 0.1), ThreshList=np.arange(0, 1.1, 0.2), **kwargs):
+
+
 
 
 def stackBar(r, Actions, repeat=30, multiArm='greedy', **kwargs):  # Plotting the data for round r
@@ -222,7 +267,7 @@ def stackBar(r, Actions, repeat=30, multiArm='greedy', **kwargs):  # Plotting th
             else:
                 print("ERROR, Stack Bar Graph Expects Only 1 List to Compare")
                 exit(4)
-    del kwargs[k]
+    del kwargs[key]
 
     print("Comparing:", key)
     print("On:", alist)
@@ -286,9 +331,14 @@ def main():
     #             for r in range(R):
     #                 stackPlot(data, r, Actions, I, titleComment="N="+ str(N) + ", R=" + str(R) + ", alpha=" +str(alpha) + ", Well-Mixed graph")
 
-    for k in [2, 4, 10, 40, 90, 99]:
-        data = rep(repeat=30, N=100, K=k, Actions=Actions, R=1, I=I, P=P)
-        stackPlot(data, r=0, Iterations=I, Actions=Actions, titleComment=("K=" + str(k) + ", P=" + str(P)))
+
+    # for k in [2, 4, 10, 40, 90, 99]:
+    #     data = rep(repeat=30, N=100, K=k, Actions=Actions, R=1, I=I, P=P)
+    #     stackPlot(data, r=0, Iterations=I, Actions=Actions, titleComment=("K=" + str(k) + ", P=" + str(P)))
+
+
+    # data = rep(repeat=30, Actions=Actions, R=1, I=I, RF=2, threshold=0.3)
+    # stackPlot(data, r=0, Iterations=I, Actions=Actions, titleComment="threshold = 0.3")
 
 
     """
@@ -298,10 +348,10 @@ def main():
     # graph_kp3d(Actions)
 
     """
-    Graph3: Actions by different alpha value
+    Graph3: Comparing a parameter (put in a list)
     """
     # stackBar(0, Actions, repeat=1, alpha=[0, 0.2, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
-    # stackBar(0, Actions, repeat=1, N=[5, 10, 20, 50, 100])
+    # stackBar(0, Actions, repeat=30, N=[5, 10, 20, 50, 100], threshold=0.6, RF=2)
     # stackBar(0, Actions, repeat=1, RF=2, threshold=[0.2, 0.4, 0.6, 0.8, 1])
 
     """
@@ -310,6 +360,11 @@ def main():
     # stackBar(0, Actions, repeat=1, multiArm='greedy', epsilon=[0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
     # stackBar(0, Actions, repeat=30, multiArm='decrease', epsilon=[0.8, 0.9, 0.95, 0.98, 0.99, 0.999, 0.9999])
 
+    """
+    Graph4: Average contribution by Alpha and Threshold
+    """
+
+    graph3d_alpha_threshold(Actions, repeat=30, RF=2)
 
 if __name__ == '__main__':
     main()
