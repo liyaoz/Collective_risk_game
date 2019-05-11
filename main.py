@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
-import scipy
 from scipy import stats
 import game
 
@@ -192,11 +191,6 @@ def t_test(repeat, Actions, r=0, R=1, I=1000, lastIterations=100, N=100, byThres
 
     for s in (0, 1):
         newArgs = {**{key: atuple[s]}, **kwargs}
-        # for re in range(repeat):
-        #     # print("T-Test REP", re)
-        #     g = game.Game(R=R, Actions=Actions, I=I, N=N, **newArgs)
-        #     result = g.play()
-        #     samples[s, re] = averageOfLast(result, Actions, N, r, lastIterations)[0]
         samples[s] = repHist(repeat, Actions, R, r, I, lastIterations, N, **newArgs)
         if byThreshold:
             samples[s] /= newArgs["threshold"]
@@ -208,7 +202,7 @@ def t_test(repeat, Actions, r=0, R=1, I=1000, lastIterations=100, N=100, byThres
 def repHist(repeat, Actions, R=1, r=0, I=1000, lastIterations=100, N=100, **kwargs):
     hist = np.zeros(repeat)
     for re in range(repeat):
-        print("HistREP", re)
+        # print("HistREP", re)
         g = game.Game(R=R, Actions=Actions, I=I, N=N, **kwargs)
         result = g.play()
         hist[re] = averageOfLast(result, Actions, N, r, lastIterations)[0]
@@ -264,7 +258,7 @@ def main():
     """
     # stackBar(0, Actions, repeat=1, alpha=[0, 0.2, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
     # stackBar(0, Actions, repeat=1, N=[5, 10, 20, 50, 100], threshold=0.6, RF=2)
-    # stackBar(0, Actions, repeat=1, RF=2, threshold=[0.2, 0.4, 0.6, 0.8, 1])
+    stackBar(0, Actions, repeat=30, RF=2, threshold=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
 
     """
     Graph4: Actions by different epsilon method + value
@@ -299,17 +293,26 @@ def main():
     # t_test(30, Actions, alpha=(1, 0.45), RF=2, threshold=0.2)   #pvalue=1.3749e-11
     # t_test(30, Actions, alpha=(1, 0.4), RF=2, threshold=0.2)    #pvalue=3.8352e-19
 
-    """T-TEST GRAPH"""
+    """T-TEST K,P"""
 
     # t_test(30, Actions, K=(2, 99), P=0)    #pvalue=0.4278
     # t_test(30, Actions, K=(2, 99), P=0.9)  #pvalue=0.4541
-    # t_test(100, Actions, K=(2, 99), P=0.8) #pvalue=0.01502  ***
+    # for _ in range(5):
+    #     t_test(30, Actions, K=(2, 99), P=0.8) #pvalue=0.01502  ***
     # t_test(30, Actions, K=(2, 99), P=0.85) #pvalue=0.1931
     # t_test(30, Actions, K=(2, 99), P=0.75) #pvalue=0.5630
     # t_test(30, Actions, K=2, P=(0, 0.9))   #pvalue=0.9806
     # t_test(30, Actions, K=2, P=(0, 0.8))   #pvalue=0.4523
     # t_test(30, Actions, K=(2, 99), P=0.9)  #pvalue=0.4541
     # t_test(30, Actions, K=(2, 99), P=0.7)  #pvalue=0.3698
+    # t_test(30, Actions, K=99, P=(0, 0.8))  #pvalue=0.8167
+
+
+
+    # base = repHist(30, Actions, K=99)
+    # for p in np.arange(0.76, 0.85, 0.01):         #ALL >.05
+    #     compare = repHist(30, Actions, K=2, P=p)
+    #     print("K=2, P=", p, stats.ttest_ind(base, compare))
 
 
 
