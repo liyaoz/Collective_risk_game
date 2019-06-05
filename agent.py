@@ -35,10 +35,7 @@ class Agent:
 
     def updateReward(self, round, action, loss):
         """
-        :param round:
-        :param action:
-        :param loss:
-        :return:
+        updates the Q-table by receiving a payoff
         """
         newWealth = self.wealth * (1-action) * (1-loss)
         reward = newWealth - self.wealth
@@ -54,9 +51,13 @@ class Agent:
         else:
             print("ERROR: Illegal round number")
             exit(2)
+
+        """Update function"""
         self.qTable[round][index] += self.learnRate * (
                 reward + self.discount * maxNextQ - self.qTable[round][index])
-        # print("QTABLE:", self.qTable)
+
+        # if self.iteration == 999:
+        #     print("QTABLE:", self.qTable)
 
         if round == self.R - 1:
             self.iteration += 1
@@ -64,14 +65,15 @@ class Agent:
 
 
     def chooseAction(self, roundNumber):
-
-        """Method: Q-learning"""
-
+        """
+        Choose an action based on current round number
+        :return: an action (float type)
+        """
         randomAct = False
         if self.multiArm == 'decrease':
             """Epsilon Decrease"""
             if np.random.uniform(0, 1) <= 1 * self.epsilon ** self.iteration:
-               randomAct = True
+                randomAct = True
 
         elif self.multiArm == 'greedy':
             """EPSILON GREEDY"""
