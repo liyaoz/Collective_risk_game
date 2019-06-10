@@ -29,7 +29,7 @@ class Game:
         self.iterations = I
 
         """
-        | 2-Player Game Graph Model:
+        | 2-Player Game Graph Model: (Small-world network)
         |
         | P: Probability of rewiring each original edge in the graph
         |
@@ -115,9 +115,11 @@ class Game:
 
                     for p in [i, j]:
                         if np.random.uniform(0, 1) < risk:
-                            lossTable[p, r] += self.alpha / self.graph.getNodesNumber()[p]
+                            lossTable[p, r] += self.alpha / \
+                                               self.graph.getNodesNumber()[p]
                 for i in range(self.N):
-                    self.players[i].updateReward(r, actionTable[i][r], lossTable[i][r])
+                    self.players[i].updateReward(r, actionTable[i][r],
+                                                 lossTable[i][r])
 
             for r in range(self.R):
                 unique, count = np.unique(strategyTable[r], return_counts=True)

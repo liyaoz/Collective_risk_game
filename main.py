@@ -1,6 +1,6 @@
 """
 This file contains graph methods and t-test implementations. The main
-function should produce all Figures and t-test results as the thesis.
+function should produce all Figures and t-test results in the thesis.
 
 Author: Liyao Zhu  liyao@student.unimelb.edu.au
 Date:   Apr. 2019
@@ -340,142 +340,35 @@ def main():
     #           titleComment="0.999 - decrease", legendLoc='lower left')
 
 
+    """T-tests 1. Average contribution of different T"""
+    # t_test(30, Actions, alpha=1, RF=2, threshold=(0.9, 1.0))    #p=0.2708
+    # t_test(30, Actions, alpha=1, RF=2, threshold=(0.8, 1.0))    #p=0.1096
+    # t_test(30, Actions, alpha=1, RF=2, threshold=(0.7, 1.0))    #p=0.1633
+    # t_test(30, Actions, alpha=1, RF=2, threshold=(0.6, 1.0))    #p=0.2208
 
+    # t_test(30, Actions, alpha=1, RF=2, threshold=(0.5, 1.0))    #p=2.2067e-08
 
-    """
-    Graph1: Number of Actions of Round r (start by 0) by Iteration
-    """
-
-    # RepeatTimes = 30
-    # for N in [5, 10, 20, 50, 100]:
-    #     K = N - 1
-    #     for R in [1, 2, 4]:
-    #         for alpha in [0.2, 0.4, 0.6, 0.8, 1]:
-    #             data = rep(RepeatTimes, R, Actions, I, N=N, K=K, alpha=alpha)
-    #             for r in range(R):
-    #                 stackPlot(data, r, Actions, I, titleComment="N="+ str(N) + ", R=" + str(R) + ", alpha=" +str(alpha) + ", Well-Mixed graph")
-
-
-    # for k in [2, 99]:
-    #     for p in [0.8]:
-    #         data = rep(repeat=30, N=100, K=k, Actions=Actions, R=1, I=I, P=p)
-    #         stackPlot(data, r=0, Iterations=I, Actions=Actions, titleComment=("K=" + str(k) + ", P=" + str(p)))
-
-    """
-    Graph2: Average contribution by K, P
-    """
-    # graph_kp3d(Actions)
-
-    """
-    Graph3: Comparing a parameter (put in a list)
-    """
-    # stackBar(0, Actions, repeat=1, N=[5, 10, 20, 50, 100], threshold=0.6, RF=2)
-    # stackBar(0, Actions, repeat=30, RF=2, threshold=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
-
-    """
-    Graph4: Actions by different epsilon with multi-arm bandit algorithms
-    """
-
-
-    # stackBar(0, Actions, repeat=30, multiArm='greedy', legendLoc='lower right',
-    #          epsilon=[0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
-    #          threshold=0.3, RF=2)
-
-
-    # data = rep(repeat=30, Actions=Actions, multiArm='greedy', epsilon=0.05)
-    # stackPlot(data, r=0, Iterations=I, Actions=Actions, titleComment="0.05 - greedy",legendLoc='lower left')
-    #
-    # data = rep(repeat=30, Actions=Actions, multiArm='greedy', epsilon=0.1)
-    # stackPlot(data, r=0, Iterations=I, Actions=Actions, titleComment="0.1 - greedy",legendLoc='lower left')
-    #
-    # data = rep(repeat=30, Actions=Actions, multiArm='greedy', epsilon=0.2)
-    # stackPlot(data, r=0, Iterations=I, Actions=Actions, titleComment="0.2 - greedy",legendLoc='lower left')
-
-
-
-    # data = rep(repeat=30, Actions=Actions, multiArm='greedy', epsilon=0.6, I=5000)
-    # stackPlot(data, r=0, Iterations=5000, Actions=Actions, titleComment="0.6 - greedy", legendLoc='lower left')
-
-    # data = rep(repeat=30, Actions=Actions, multiArm='decrease', epsilon=0.9)
-    # stackPlot(data, r=0, Iterations=I, Actions=Actions, titleComment="0.9 - decrease",legendLoc='lower left')
-
-    # data = rep(repeat=30, Actions=Actions, multiArm='decrease', epsilon=0.99)
-    # stackPlot(data, r=0, Iterations=I, Actions=Actions, titleComment="0.99 - decrease",legendLoc='lower left')
-    #
-    # data = rep(repeat=30, Actions=Actions, multiArm='decrease', epsilon=0.999)
-    # stackPlot(data, r=0, Iterations=I, Actions=Actions, titleComment="0.999 - decrease",legendLoc='lower left')
-
-
-
-
-
-
-
-
-    """
-    T-Test
-    """
-
-    # t_test(30, Actions, alpha=1, RF=2, threshold=(0.2, 0.3), byThreshold=True)   #p=3.324e-31
-    # t_test(30, Actions, alpha=1, RF=2, threshold=(0.6, 1.0))    #pvalue=0.2208
-    # t_test(30, Actions, alpha=1, RF=2, threshold=(0.8, 1.0))    #pvalue=0.1096
-    # t_test(30, Actions, alpha=1, RF=2, threshold=(0.5, 1.0))    #pvalue=2.2067e-08
-    # t_test(30, Actions, alpha=0.85, RF=2, threshold=(0.2, 0.3), byThreshold=True)   #pvalue=0.005865
-
-    # t_test(30, Actions, alpha=(1, 0.9), RF=2, threshold=0.2)    #pvalue=0.3748
-    # t_test(30, Actions, alpha=(1, 0.85), RF=2, threshold=0.2)   #pvalue=0.001466
-    # t_test(30, Actions, alpha=(1, 0.8), RF=2, threshold=0.2)    #pvalue=0.0002030
-    # t_test(30, Actions, alpha=(1, 0.75), RF=2, threshold=0.2)   #pvalue=3.9617e-07
-    # t_test(30, Actions, alpha=(1, 0.7), RF=2, threshold=0.2)    #pvalue=2.2428e-09
-    # t_test(30, Actions, alpha=(1, 0.65), RF=2, threshold=0.2)   #pvalue=6.8966e-09
-    # t_test(30, Actions, alpha=(1, 0.6), RF=2, threshold=0.2)    #pvalue=7.1621e-15
-    # t_test(30, Actions, alpha=(1, 0.5), RF=2, threshold=0.2)    #pvalue=4.1760e-13
-    # t_test(30, Actions, alpha=(1, 0.45), RF=2, threshold=0.2)   #pvalue=1.3749e-11
-    # t_test(30, Actions, alpha=(1, 0.4), RF=2, threshold=0.2)    #pvalue=3.8352e-19
+    """T-test 2. Average contribution of different alpha when T=0.2"""
 
     # base = repHist(30, Actions, alpha=1, RF=2, threshold=0.2)
     # for alpha in np.arange(0.8, 1, 0.01):
     #     compare = repHist(30, Actions, alpha=alpha, RF=2, threshold=0.2)
     #     print("Alpha=", alpha, stats.ttest_ind(base, compare))
 
-    """Epsilon-decrease 0.99 with 0.1 and 0.999"""
+
+
+    """T-test 3. Avg contribution of Epsilon-decrease 0.99 with 0.1 and 0.999"""
 
     # base = repHist(30, Actions, multiArm='decrease', epsilon=0.99)
     # for epsilon in (0.1, 0.999):
     #     compare = repHist(30, Actions, multiArm='decrease', epsilon=epsilon)
     #     print("Epsilon=", epsilon, stats.ttest_ind(base, compare))
 
-    """T-TEST for 0.999-decrease 5000 iterations with 0.9"""
+    """T-test 4. Avg contribution of 0.999-decrease 5000 iterations with 0.9"""
     # base = repHist(30, Actions, multiArm='decrease', epsilon=0.9)
     # compare = repHist(30, Actions, multiArm='decrease', epsilon=0.999, I=5000)
     # print(stats.ttest_ind(base, compare))
 
-
-
-
-
-
-
-    """T-TEST K,P"""
-
-    # t_test(30, Actions, K=(2, 99), P=0)    #pvalue=0.4278
-    # t_test(30, Actions, K=(2, 99), P=0.9)  #pvalue=0.4541
-    # for _ in range(5):
-    #     t_test(30, Actions, K=(2, 99), P=0.8) #pvalue=0.01502  ***
-    # t_test(30, Actions, K=(2, 99), P=0.85) #pvalue=0.1931
-    # t_test(30, Actions, K=(2, 99), P=0.75) #pvalue=0.5630
-    # t_test(30, Actions, K=2, P=(0, 0.9))   #pvalue=0.9806
-    # t_test(30, Actions, K=2, P=(0, 0.8))   #pvalue=0.4523
-    # t_test(30, Actions, K=(2, 99), P=0.9)  #pvalue=0.4541
-    # t_test(30, Actions, K=(2, 99), P=0.7)  #pvalue=0.3698
-    # t_test(30, Actions, K=99, P=(0, 0.8))  #pvalue=0.8167
-
-
-
-    # base = repHist(30, Actions, K=99)
-    # for p in np.arange(0.76, 0.85, 0.01):         #ALL >.05
-    #     compare = repHist(30, Actions, K=2, P=p)
-    #     print("K=2, P=", p, stats.ttest_ind(base, compare))
 
 
 
