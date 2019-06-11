@@ -37,7 +37,14 @@ kept for further study, but only well-mixed graphs were deployed so far.
 
 ---
 
+Jupyter Notebook supported. Use the .ipynb file.
+
+To avoid installing packages and setting up virtualenv, upload .ipynb file in 
+Google Colab.
+
+--
+
 Author: Liyao Zhu liyaoz@student.unimelb.edu.au
 
-Last Update: 11 Jun. 2019
+Last Update: 12 Jun. 2019
 
