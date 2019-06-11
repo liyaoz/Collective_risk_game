@@ -1,4 +1,5 @@
-#Collective-Risk Dilemma + Q-learning
+README
+# Collective-Risk Dilemma + Q-learning
 This repo contains files that support the project of studying Q-learning agents
 in a collective-risk dilemma.
 
@@ -36,7 +37,7 @@ kept for further study, but only well-mixed graphs were deployed so far.
 
 ---
 
-Author: Liyao Zhu `liyaoz@student.unimelb.edu.au`
+Author: Liyao Zhu liyaoz@student.unimelb.edu.au
 
 Last Update: 11 Jun. 2019
 
