@@ -275,9 +275,9 @@ def main():
 
 
     """Fig. 2"""
-    # data = rep(repeat=repeat, N=100, alpha=0.8, R=8)
-    # stackPlot(data, r=0, Iterations=I, Actions=Actions,
-    #           legendLoc='lower right')
+    data = rep(repeat=repeat, N=100, alpha=0.8, R=8)
+    stackPlot(data, r=0, Iterations=I, Actions=Actions,
+              legendLoc='lower right')
 
 
     """Fig. 3"""
@@ -368,8 +368,6 @@ def main():
     # base = repHist(30, Actions, multiArm='decrease', epsilon=0.9)
     # compare = repHist(30, Actions, multiArm='decrease', epsilon=0.999, I=5000)
     # print(stats.ttest_ind(base, compare))
-
-
 
 
 if __name__ == '__main__':
